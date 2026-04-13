@@ -1,27 +1,30 @@
 const crypto = require('crypto');
 
-function generateSecret(name) {
+function generateSecret() {
   return crypto.randomBytes(32).toString('base64');
 }
 
-function getEnvWithFallback(env, key, fallback) {
+function getEnvSafe(env, key, fallback) {
   const val = env(key);
-  if (!val || val.trim() === '') {
+  // env() повертає: undefined якщо змінної немає, або рядок якщо є
+  // Strapi Cloud може встановлювати порожній рядок ''
+  if (val === undefined || val === null || val.trim() === '') {
     return fallback;
   }
-  return val;
+  // Видаляємо лапки якщо вони є (env іноді залишає їх)
+  return val.replace(/^["']|["']$/g, '').trim();
 }
 
 module.exports = ({ env }) => ({
   auth: {
-    secret: getEnvWithFallback(env, 'ADMIN_JWT_SECRET', generateSecret('admin-jwt')),
+    secret: getEnvSafe(env, 'ADMIN_JWT_SECRET', generateSecret()),
   },
   apiToken: {
-    salt: getEnvWithFallback(env, 'API_TOKEN_SALT', generateSecret('api-token-salt')),
+    salt: getEnvSafe(env, 'API_TOKEN_SALT', generateSecret()),
   },
   transfer: {
     token: {
-      salt: getEnvWithFallback(env, 'TRANSFER_TOKEN_SALT', generateSecret('transfer-token-salt')),
+      salt: getEnvSafe(env, 'TRANSFER_TOKEN_SALT', generateSecret()),
     },
   },
   flags: {

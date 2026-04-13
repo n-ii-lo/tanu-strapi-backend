@@ -5,21 +5,21 @@ function generateSecret() {
   return crypto.randomBytes(32).toString('base64');
 }
 
-function getEnvArrayWithFallback(env, key, fallback) {
+function getEnvArraySafe(env, key, fallback) {
   const val = env(key);
-  if (!val || val.trim() === '') {
+  if (val === undefined || val === null || val.trim() === '') {
     return fallback;
   }
-  if (typeof val === 'string') {
-    return val.split(',').map(s => s.trim()).filter(Boolean);
-  }
-  return val;
+  // Видаляємо лапки та розділяємо по комі
+  const cleaned = val.replace(/^["']|["']$/g, '').trim();
+  if (cleaned === '') return fallback;
+  return cleaned.split(',').map(s => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
 }
 
 module.exports = ({ env }) => ({
   autoOpen: false,
   app: {
-    keys: getEnvArrayWithFallback(env, 'APP_KEYS', [generateSecret(), generateSecret()]),
+    keys: getEnvArraySafe(env, 'APP_KEYS', [generateSecret(), generateSecret()]),
   },
   webhooks: {
     populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', false),

@@ -4,16 +4,24 @@ function generateSecret(name) {
   return crypto.randomBytes(32).toString('base64');
 }
 
+function getEnvWithFallback(env, key, fallback) {
+  const val = env(key);
+  if (!val || val.trim() === '') {
+    return fallback;
+  }
+  return val;
+}
+
 module.exports = ({ env }) => ({
   auth: {
-    secret: env('ADMIN_JWT_SECRET', generateSecret('admin-jwt')),
+    secret: getEnvWithFallback(env, 'ADMIN_JWT_SECRET', generateSecret('admin-jwt')),
   },
   apiToken: {
-    salt: env('API_TOKEN_SALT', generateSecret('api-token-salt')),
+    salt: getEnvWithFallback(env, 'API_TOKEN_SALT', generateSecret('api-token-salt')),
   },
   transfer: {
     token: {
-      salt: env('TRANSFER_TOKEN_SALT', generateSecret('transfer-token-salt')),
+      salt: getEnvWithFallback(env, 'TRANSFER_TOKEN_SALT', generateSecret('transfer-token-salt')),
     },
   },
   flags: {

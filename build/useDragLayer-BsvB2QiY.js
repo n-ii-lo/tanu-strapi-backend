@@ -1,0 +1,1 @@
+import{f4 as s,f5 as c,r as o}from"./strapi-C-zD5Kso.js";function f(t){const e=s().getMonitor(),[a,r]=c(e,t);return o.useEffect(()=>e.subscribeToOffsetChange(r)),o.useEffect(()=>e.subscribeToStateChange(r)),a}export{f as u};
